@@ -1,12 +1,53 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Website</title>
+<meta charset="utf-8">
+<title>Private Blog</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body { font-family: system-ui, sans-serif; padding: 2rem; }
+  .hidden { display: none; }
+</style>
+<script>
+  // Replace with your actual SHA-256 hash
+  const passwordHash = "56bbbb0a1a7c2cf2cf88ecbcf15f9bdcd8b07539097af7aa3b7a712219f9dd61";
+
+  async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+
+  async function checkPassword() {
+    const entered = prompt("Enter password to view this page:");
+    if (!entered) return deny();
+
+    const hash = await sha256(entered);
+    if (hash === passwordHash) {
+      document.getElementById("protected").classList.remove("hidden");
+      document.getElementById("locked").classList.add("hidden");
+    } else {
+      deny();
+    }
+  }
+
+  function deny() {
+    document.getElementById("locked").innerHTML = "<h2>Access Denied</h2><p>Wrong password.</p>";
+  }
+
+  window.addEventListener("DOMContentLoaded", checkPassword);
+</script>
 </head>
 <body>
-    <h1>Welcome to my website!</h1>
-    <p>This is my first HTML page.</p>
+  <div id="locked"><p>Verifying...</p></div>
+  <main id="protected" class="hidden">
+    <h1>My Private Blog</h1>
+    <p>Welcome! This content is password protected.</p>
+    <article>
+      <h2>Post Title</h2>
+      <p>Your private post content goes here.</p>
+    </article>
+  </main>
 </body>
 </html>
